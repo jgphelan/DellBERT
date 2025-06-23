@@ -1,8 +1,5 @@
-# DellBERT
+# DellBERT | Review Insights – README
 A Topic and Sentiment Analysis Classifier for Costumer Reviews
-
-
-# FusionTech Review Insights – README
 
 *(Pure-ML pipeline: preprocessing ➜ topic modeling ➜ sentiment classifier ➜ summaries)*
 
