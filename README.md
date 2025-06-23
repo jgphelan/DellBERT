@@ -1,5 +1,5 @@
 # DellBERT | Review Insights – README
-A Topic and Sentiment Analysis Classifier for Costumer Reviews
+A topic and sentiment analysis classifier for costumer reviews.
 
 *(Pure-ML pipeline: preprocessing ➜ topic modeling ➜ sentiment classifier ➜ summaries)*
 
