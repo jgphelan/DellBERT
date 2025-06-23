@@ -37,7 +37,7 @@ pip install -r requirements.txt        # transformers, datasets, peft, scikit-le
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:64
 ```
 
-* Rough GPU memory guide*
+*Rough GPU memory guide*
 
 | Card              | Pipeline fits? | Notes                    |
 | ----------------- | -------------- | ------------------------ |
