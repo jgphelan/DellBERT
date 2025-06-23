@@ -1,0 +1,109 @@
+# DellBERT
+A Topic and Sentiment Analysis Classifier for Costumer Reviews
+
+
+# FusionTech Review Insights – README
+
+*(Pure-ML pipeline: preprocessing ➜ topic modeling ➜ sentiment classifier ➜ summaries)*
+
+---
+
+## 1. What this repo / notebook delivers
+
+| Stage                         | Output                                                                               | Purpose                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **01 Clean.ipynb**            | `clean_reviews.csv`                                                                  | English-only, emoji-free review text + star rating + 3-class sentiment label                   |
+| **03 Topics.ipynb**           | `lda_vectorizer.joblib`, `lda_model.joblib`<br>`topic_labels.pkl`, `with_topics.csv` | 10-topic LDA model + human-readable KeyBERT labels; each review tagged with its dominant topic |
+| **05 Sentiment.ipynb**        | `sentiment_final/` (folder)<br>  – `adapter_model.bin` (LoRA)<br>  – tokenizer files | DistilBERT-base fine-tuned via LoRA (3-class) + tokenizer                                      |
+| **06 Aggregate.ipynb**        | `topic_sentiment_summary.csv`                                                        | Support-ready pivot: topic × {negative, neutral, positive, total}                              |
+| **Demo-cell** (README bottom) | live predictions                                                                     | Classify any new review text → topic + sentiment                                               |
+
+---
+
+## 2. Quick-start (Google Colab)
+
+1. Open **`00_setup.ipynb`** → click *Run all* (installs packages).
+2. Upload raw CSV (`FusionTech Online Reviews Data Set.csv`).
+3. Execute notebooks **in numeric order**.
+   *Run-all runtime ≈ 12 min on a free T4.*
+4. At the end of **06 Aggregate**, download `topic_sentiment_summary.csv`.
+
+---
+
+## 3. Local setup (GPU workstation / server)
+
+```bash
+git clone <this-repo>
+cd FusionTech-Review-Insights
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt        # transformers, datasets, peft, scikit-learn, keybert …
+export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:64
+```
+
+*GPU memory guide*
+
+| Card              | Pipeline fits? | Notes                    |
+| ----------------- | -------------- | ------------------------ |
+| T4 / A10 24 GB    | **Yes**        | LoRA adapter + inference |
+| A100 / H100 80 GB | **Training**   | Full CV loop in \~30 min |
+
+---
+
+## 4. Running the end-to-end demo script
+
+```bash
+python demo_predict.py \
+   --model_dir sentiment_final \
+   --vectorizer models/lda_vectorizer.joblib \
+   --lda_model models/lda_model.joblib \
+   --labels_pickle models/topic_labels.pkl \
+   --input reviews_to_score.txt \
+   --out scored_reviews.csv
+```
+
+*`scored_reviews.csv` adds columns:* `predicted_topic`, `predicted_sentiment`.
+
+---
+
+## 5. File / folder glossary
+
+| Path                           | What it contains                                           |
+| ------------------------------ | ---------------------------------------------------------- |
+| `clean_reviews.csv`            | Pre-processed review text + stars + 3-class label          |
+| `models/lda_vectorizer.joblib` | Fitted `CountVectorizer` (min\_df = 10, max\_df = 0.40)    |
+| `models/lda_model.joblib`      | 10-topic `LatentDirichletAllocation`                       |
+| `models/topic_labels.pkl`      | `{topic_id: "Battery Life", …}` from KeyBERT               |
+| `sentiment_final/`             | DistilBERT checkpoint with LoRA adapter + tokenizer        |
+| `with_topics.csv`              | Every review with `topic_id` column already mapped to text |
+| `topic_sentiment_summary.csv`  | Pivot table for Customer-Support triage                    |
+| `demo_predict.py`              | CLI example (loads all artefacts, scores new text)         |
+
+---
+
+## 6. Updating the model with fresh data
+
+1. Append new reviews to the raw CSV.
+2. Re-run **01 Clean** → **03 Topics** (optional sub-topics) → **05 Sentiment** (LoRA fine-tune takes ≈ 6 min per epoch) → **06 Aggregate**.
+3. Swap the old adapter with the new `sentiment_final/` in production; topic model is drop-in if vocabulary unchanged.
+
+---
+
+## 7. Deployment snapshot
+
+| Component        | Container / image              | Runtime                                     |
+| ---------------- | ------------------------------ | ------------------------------------------- |
+| **REST API**     | `uvicorn gunicorn-fastapi:app` | 1 × T4 → \~ 25 ms P99                       |
+| **Batch scorer** | `score_topic_sent.py`          | CPU × 8 vCPU → \~ 1 M rev/hr                |
+| **Dashboard**    | `streamlit==1.35`              | reads `topic_sentiment_summary.csv` nightly |
+
+All containers mount `sentiment_final/` and `models/` read-only; hot-swap adapters without redeploying the API.
+
+---
+
+## 8. Licence & acknowledgements
+
+* Code: MIT
+* Pre-trained model weights: Apache 2.0 via Hugging Face (`distilbert-base-uncased`)
+* LDA/KeyBERT rely on scikit-learn BSD 3-Clause & sentence-transformers Apache 2.0
+
+Made with ♥ by the FusionTech ML team.
