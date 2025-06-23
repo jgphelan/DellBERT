@@ -10,8 +10,8 @@ A Topic and Sentiment Analysis Classifier for Costumer Reviews
 | Stage                         | Output                                                                               | Purpose                                                                                        |
 | ----------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | **01 Clean.ipynb**            | `clean_reviews.csv`                                                                  | English-only, emoji-free review text + star rating + 3-class sentiment label                   |
-| **03 Topics.ipynb**           | `lda_vectorizer.joblib`, `lda_model.joblib`<br>`topic_labels.pkl`, `with_topics.csv` | 10-topic LDA model + human-readable KeyBERT labels; each review tagged with its dominant topic |
-| **05 Sentiment.ipynb**        | `sentiment_final/` (folder)<br>  – `adapter_model.bin` (LoRA)<br>  – tokenizer files | DistilBERT-base fine-tuned via LoRA (3-class) + tokenizer                                      |
+| **03 Topics.ipynb**           | `with_topics.csv`                                                                    | 10-topic LDA model + human-readable KeyBERT labels; each review tagged with its dominant topic |
+| **05 Sentiment.ipynb**        | `sentiment_final/`                                                                   | DistilBERT-base fine-tuned via LoRA (3-class) + tokenizer                                      |
 | **06 Aggregate.ipynb**        | `topic_sentiment_summary.csv`                                                        | Support-ready pivot: topic × {negative, neutral, positive, total}                              |
 | **Demo-cell** (README bottom) | live predictions                                                                     | Classify any new review text → topic + sentiment                                               |
 
@@ -20,9 +20,9 @@ A Topic and Sentiment Analysis Classifier for Costumer Reviews
 ## 2. Quick-start (Google Colab)
 
 1. Open **`00_setup.ipynb`** → click *Run all* (installs packages).
-2. Upload raw CSV (`FusionTech Online Reviews Data Set.csv`).
+2. Upload raw reviews CSV (`FusionTech Online Reviews Data Set.csv`).
 3. Execute notebooks **in numeric order**.
-   *Run-all runtime ≈ 12 min on a free T4.*
+   *Run-all runtime ≈ 10 min on a free T4.*
 4. At the end of **06 Aggregate**, download `topic_sentiment_summary.csv`.
 
 ---
@@ -37,12 +37,12 @@ pip install -r requirements.txt        # transformers, datasets, peft, scikit-le
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:64
 ```
 
-*GPU memory guide*
+* Rough GPU memory guide*
 
 | Card              | Pipeline fits? | Notes                    |
 | ----------------- | -------------- | ------------------------ |
 | T4 / A10 24 GB    | **Yes**        | LoRA adapter + inference |
-| A100 / H100 80 GB | **Training**   | Full CV loop in \~30 min |
+| A100 / H100 80 GB | **Training**   | Full CV loop             |
 
 ---
 
@@ -67,9 +67,6 @@ python demo_predict.py \
 | Path                           | What it contains                                           |
 | ------------------------------ | ---------------------------------------------------------- |
 | `clean_reviews.csv`            | Pre-processed review text + stars + 3-class label          |
-| `models/lda_vectorizer.joblib` | Fitted `CountVectorizer` (min\_df = 10, max\_df = 0.40)    |
-| `models/lda_model.joblib`      | 10-topic `LatentDirichletAllocation`                       |
-| `models/topic_labels.pkl`      | `{topic_id: "Battery Life", …}` from KeyBERT               |
 | `sentiment_final/`             | DistilBERT checkpoint with LoRA adapter + tokenizer        |
 | `with_topics.csv`              | Every review with `topic_id` column already mapped to text |
 | `topic_sentiment_summary.csv`  | Pivot table for Customer-Support triage                    |
@@ -85,19 +82,7 @@ python demo_predict.py \
 
 ---
 
-## 7. Deployment snapshot
-
-| Component        | Container / image              | Runtime                                     |
-| ---------------- | ------------------------------ | ------------------------------------------- |
-| **REST API**     | `uvicorn gunicorn-fastapi:app` | 1 × T4 → \~ 25 ms P99                       |
-| **Batch scorer** | `score_topic_sent.py`          | CPU × 8 vCPU → \~ 1 M rev/hr                |
-| **Dashboard**    | `streamlit==1.35`              | reads `topic_sentiment_summary.csv` nightly |
-
-All containers mount `sentiment_final/` and `models/` read-only; hot-swap adapters without redeploying the API.
-
----
-
-## 8. Licence & acknowledgements
+## 7. Licence & acknowledgements
 
 * Code: MIT
 * Pre-trained model weights: Apache 2.0 via Hugging Face (`distilbert-base-uncased`)
