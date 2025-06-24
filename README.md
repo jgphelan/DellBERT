@@ -48,7 +48,7 @@ python demo_predict.py \
 | ------------------------------ | ---------------------------------------------------------- |
 | `clean_reviews.csv`            | Pre-processed review text + stars + 3-class label          |
 | `sentiment_final/`             | DistilBERT checkpoint with LoRA adapter + tokenizer        |
-| 'with_topcs_only_index.csv'    | Every review labeled with 'topic_id'                       |
+| `with_topcs_only_index.csv`    | Every review labeled with 'topic_id'                       |
 | `with_topics.csv`              | Every review with `topic_id` column already mapped to text |
 | `topic_sentiment_summary.csv`  | Pivot table for Customer-Support triage                    |
 | `demo_predict.py`              | CLI example (loads all artefacts, scores new text)         |
