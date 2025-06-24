@@ -13,7 +13,7 @@ A topic and sentiment analysis classifier for costumer reviews.
 | **03 Topics.ipynb**           | `with_topics.csv`                                                                    | 10-topic LDA model + human-readable KeyBERT labels; each review tagged with its dominant topic |
 | **05 Sentiment.ipynb**        | `sentiment_final/`                                                                   | DistilBERT-base fine-tuned via LoRA (3-class) + tokenizer                                      |
 | **06 Aggregate.ipynb**        | `topic_sentiment_summary.csv`                                                        | Support-ready pivot: topic × {negative, neutral, positive, total}                              |
-| **Demo-cell** (README bottom) | live predictions                                                                     | Classify any new review text → topic + sentiment                                               |
+| **Demo-cell** (README bottom) | live predictions                                                                     | Classify any new review text → sentiment                                               |
 
 ---
 
@@ -22,31 +22,11 @@ A topic and sentiment analysis classifier for costumer reviews.
 1. Open **`00_setup.ipynb`** → click *Run all* (installs packages).
 2. Upload raw reviews CSV (`FusionTech Online Reviews Data Set.csv`).
 3. Execute notebooks **in numeric order**.
-   *Run-all runtime ≈ 10 min on a free T4.*
 4. At the end of **06 Aggregate**, download `topic_sentiment_summary.csv`.
 
 ---
 
-## 3. Local setup (GPU workstation / server)
-
-```bash
-git clone <this-repo>
-cd FusionTech-Review-Insights
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt        # transformers, datasets, peft, scikit-learn, keybert …
-export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:64
-```
-
-*Rough GPU memory guide*
-
-| Card              | Pipeline fits? | Notes                    |
-| ----------------- | -------------- | ------------------------ |
-| T4 / A10 24 GB    | **Yes**        | LoRA adapter + inference |
-| A100 / H100 80 GB | **Training**   | Full CV loop             |
-
----
-
-## 4. Running the end-to-end demo script
+## 3. Running the end-to-end demo script
 
 ```bash
 python demo_predict.py \
@@ -62,27 +42,28 @@ python demo_predict.py \
 
 ---
 
-## 5. File / folder glossary
+## 4. File / folder glossary
 
 | Path                           | What it contains                                           |
 | ------------------------------ | ---------------------------------------------------------- |
 | `clean_reviews.csv`            | Pre-processed review text + stars + 3-class label          |
 | `sentiment_final/`             | DistilBERT checkpoint with LoRA adapter + tokenizer        |
+| 'with_topcs_only_index.csv'    | Every review labeled with 'topic_id'                       |
 | `with_topics.csv`              | Every review with `topic_id` column already mapped to text |
 | `topic_sentiment_summary.csv`  | Pivot table for Customer-Support triage                    |
 | `demo_predict.py`              | CLI example (loads all artefacts, scores new text)         |
 
 ---
 
-## 6. Updating the model with fresh data
+## 5. Updating the model with fresh data
 
 1. Append new reviews to the raw CSV.
-2. Re-run **01 Clean** → **03 Topics** (optional sub-topics) → **05 Sentiment** (LoRA fine-tune takes ≈ 6 min per epoch) → **06 Aggregate**.
+2. Re-run **01 Clean** → **03 Topics** → **05 Sentiment** → **06 Aggregate**.
 3. Swap the old adapter with the new `sentiment_final/` in production; topic model is drop-in if vocabulary unchanged.
 
 ---
 
-## 7. Licence & acknowledgements
+## 6. Licence & acknowledgements
 
 * Code: MIT
 * Pre-trained model weights: Apache 2.0 via Hugging Face (`distilbert-base-uncased`)
