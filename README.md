@@ -26,23 +26,7 @@ A topic and sentiment analysis classifier for costumer reviews.
 
 ---
 
-## 3. Running the end-to-end demo script
-
-```bash
-python demo_predict.py \
-   --model_dir sentiment_final \
-   --vectorizer models/lda_vectorizer.joblib \
-   --lda_model models/lda_model.joblib \
-   --labels_pickle models/topic_labels.pkl \
-   --input reviews_to_score.txt \
-   --out scored_reviews.csv
-```
-
-*`scored_reviews.csv` adds columns:* `predicted_topic`, `predicted_sentiment`.
-
----
-
-## 4. File / folder glossary
+## 3. File / folder glossary
 
 | Path                           | What it contains                                           |
 | ------------------------------ | ---------------------------------------------------------- |
@@ -55,7 +39,7 @@ python demo_predict.py \
 
 ---
 
-## 5. Updating the model with fresh data
+## 4. Updating the model with fresh data
 
 1. Append new reviews to the raw CSV.
 2. Re-run **01 Clean** → **03 Topics** → **05 Sentiment** → **06 Aggregate**.
@@ -63,7 +47,7 @@ python demo_predict.py \
 
 ---
 
-## 6. Licence & acknowledgements
+## 5. Licence & acknowledgements
 
 * Code: MIT
 * Pre-trained model weights: Apache 2.0 via Hugging Face (`distilbert-base-uncased`)
