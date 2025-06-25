@@ -13,7 +13,7 @@ A topic and sentiment analysis classifier for costumer reviews.
 | **03 Topics.ipynb**           | `with_topics.csv`                                                                    | 10-topic LDA model + human-readable KeyBERT labels; each review tagged with its dominant topic |
 | **05 Sentiment.ipynb**        | `sentiment_final/`                                                                   | DistilBERT-base fine-tuned via LoRA (3-class) + tokenizer                                      |
 | **06 Aggregate.ipynb**        | `topic_sentiment_summary.csv`                                                        | Support-ready pivot: topic × {negative, neutral, positive, total}                              |
-| **Demo-cell** (README bottom) | live predictions                                                                     | Classify any new review text → sentiment                                               |
+| **Demo-cell**                 | live predictions                                                                     | Classify any new example review text → sentiment                                               |
 
 ---
 
